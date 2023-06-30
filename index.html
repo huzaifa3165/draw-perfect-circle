@@ -110,25 +110,6 @@
         radius = Math.max((maxX - minX) / 2, (maxY - minY) / 2);
       }
 
-      // Calculate the score based on the accuracy of the drawn shape
-      function calculateScore() {
-        const targetScore = 100; // Maximum score for a perfect circle
-        const deviation = calculateDeviation();
-        const maxDeviation = Math.sqrt(2) * radius; // Maximum allowable deviation
-
-        // Check if the deviation exceeds a certain threshold for a poor drawing
-        if (deviation > maxDeviation) {
-          return 0;
-        }
-
-        // Calculate the score as a percentage
-        const score = Math.max(
-          0,
-          targetScore - (deviation / maxDeviation) * targetScore
-        );
-        return Math.round(score);
-      }
-
       // Calculate the deviation of the drawn shape from a perfect circle
       function calculateDeviation() {
         const numPoints = 360;
@@ -145,7 +126,23 @@
           totalDeviation += deviation;
         }
 
-        return totalDeviation / numPoints;
+        const averageDeviation = totalDeviation / numPoints;
+        const scalingFactor = 2; // Adjust this value to fine-tune the score range
+        return averageDeviation * scalingFactor;
+      }
+
+      // Calculate the score based on the accuracy of the drawn shape
+      function calculateScore() {
+        const targetScore = 100; // Maximum score for a perfect circle
+        const maxDeviation = Math.sqrt(2) * radius; // Maximum allowable deviation
+        const deviation = calculateDeviation();
+
+        // Calculate the score based on the deviation
+        const score = Math.max(
+          0,
+          targetScore - (deviation / maxDeviation) * targetScore
+        );
+        return Math.round(score);
       }
 
       // Find the closest point on the ink trail to the given coordinates
