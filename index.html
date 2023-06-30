@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle Drawing Game</title>
+    <style>
+      #canvas {
+        border: 1px solid black;
+        cursor: crosshair;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Circle Drawing Game</h1>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="score-container"></div>
+
+    <script>
+      // Get the canvas element and context
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Initialize variables
+      let isDrawing = false;
+      let inkTrail = [];
+      let center = { x: 0, y: 0 };
+      let radius = 0;
+
+      // Event listeners for mouse down, move, and up
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mousemove", drawCircle);
+      canvas.addEventListener("mouseup", stopDrawing);
+
+      // Start drawing
+      function startDrawing(e) {
+        isDrawing = true;
+        inkTrail = [];
+        center = getMouseCoordinates(e);
+      }
+
+      // Draw circle while moving
+      function drawCircle(e) {
+        if (!isDrawing) return;
+        const currentCoords = getMouseCoordinates(e);
+        inkTrail.push(currentCoords);
+        clearCanvas();
+        drawInkTrail();
+      }
+
+      // Stop drawing and calculate score
+      function stopDrawing() {
+        isDrawing = false;
+        calculateCircle();
+        clearCanvas();
+        drawInkTrail();
+        drawPerfectCircle();
+        const score = calculateScore();
+        displayScore(score);
+      }
+
+      // Get mouse coordinates relative to the canvas
+      function getMouseCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+      }
+
+      // Clear the canvas
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Draw the ink trail
+      function drawInkTrail() {
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        for (let i = 0; i < inkTrail.length; i++) {
+          const coords = inkTrail[i];
+          if (i === 0) {
+            ctx.moveTo(coords.x, coords.y);
+          } else {
+            ctx.lineTo(coords.x, coords.y);
+          }
+        }
+
+        ctx.stroke();
+      }
+
+      // Draw a perfect circle
+      function drawPerfectCircle() {
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+
+      // Calculate the center and radius of the drawn shape
+      function calculateCircle() {
+        const minX = Math.min(...inkTrail.map((coords) => coords.x));
+        const maxX = Math.max(...inkTrail.map((coords) => coords.x));
+        const minY = Math.min(...inkTrail.map((coords) => coords.y));
+        const maxY = Math.max(...inkTrail.map((coords) => coords.y));
+
+        center.x = (minX + maxX) / 2;
+        center.y = (minY + maxY) / 2;
+        radius = Math.max((maxX - minX) / 2, (maxY - minY) / 2);
+      }
+
+      // Calculate the score based on the accuracy of the drawn shape
+      function calculateScore() {
+        const targetScore = 100; // Maximum score for a perfect circle
+        const deviation = calculateDeviation();
+        const maxDeviation = Math.sqrt(2) * radius; // Maximum allowable deviation
+
+        // Check if the deviation exceeds a certain threshold for a poor drawing
+        if (deviation > maxDeviation) {
+          return 0;
+        }
+
+        // Calculate the score as a percentage
+        const score = Math.max(
+          0,
+          targetScore - (deviation / maxDeviation) * targetScore
+        );
+        return Math.round(score);
+      }
+
+      // Calculate the deviation of the drawn shape from a perfect circle
+      function calculateDeviation() {
+        const numPoints = 360;
+        let totalDeviation = 0;
+
+        for (let angle = 0; angle < numPoints; angle++) {
+          const theta = (angle * Math.PI) / 180;
+          const x = center.x + radius * Math.cos(theta);
+          const y = center.y + radius * Math.sin(theta);
+          const closestPoint = findClosestPoint({ x, y });
+          const deviation = Math.sqrt(
+            Math.pow(x - closestPoint.x, 2) + Math.pow(y - closestPoint.y, 2)
+          );
+          totalDeviation += deviation;
+        }
+
+        return totalDeviation / numPoints;
+      }
+
+      // Find the closest point on the ink trail to the given coordinates
+      function findClosestPoint(coords) {
+        let closestDistance = Infinity;
+        let closestPoint = null;
+
+        for (let i = 0; i < inkTrail.length; i++) {
+          const trailCoords = inkTrail[i];
+          const distance = Math.sqrt(
+            Math.pow(coords.x - trailCoords.x, 2) +
+              Math.pow(coords.y - trailCoords.y, 2)
+          );
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestPoint = trailCoords;
+          }
+        }
+
+        return closestPoint;
+      }
+
+      // Display the score
+      function displayScore(score) {
+        const scoreContainer = document.getElementById("score-container");
+        scoreContainer.textContent = `Your score: ${score}/100`;
+      }
+    </script>
+  </body>
+</html>
