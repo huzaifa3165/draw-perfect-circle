@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Circle Drawing Game for Austin Brown</title>
+    <title>Circle Drawing Game by Huzaifa</title>
     <style>
       #canvas {
         border: 1px solid black;
@@ -25,10 +25,11 @@
       let center = { x: 0, y: 0 };
       let radius = 0;
 
-      // Event listeners for mouse down, move, and up
+      // Event listeners for mouse down, move, up, and leave
       canvas.addEventListener("mousedown", startDrawing);
       canvas.addEventListener("mousemove", drawCircle);
       canvas.addEventListener("mouseup", stopDrawing);
+      canvas.addEventListener("mouseleave", stopDrawing);
 
       // Start drawing
       function startDrawing(e) {
@@ -48,6 +49,7 @@
 
       // Stop drawing and calculate score
       function stopDrawing() {
+        if (!isDrawing) return;
         isDrawing = false;
         calculateCircle();
         clearCanvas();
