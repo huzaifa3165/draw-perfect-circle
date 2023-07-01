@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Circle Drawing Game by Huzaifa</title>
+    <title>Circle Drawing Game</title>
     <style>
       #canvas {
         border: 1px solid black;
@@ -10,7 +10,7 @@
     </style>
   </head>
   <body>
-    <h1>Circle Drawing Game for Austin Brown by Huzaifa</h1>
+    <h1>Circle Drawing Game</h1>
     <canvas id="canvas" width="500" height="500"></canvas>
     <div id="score-container"></div>
 
@@ -25,31 +25,36 @@
       let center = { x: 0, y: 0 };
       let radius = 0;
 
-      // Event listeners for mouse down, move, up, and leave
+      // Event listeners for mouse and touch events
       canvas.addEventListener("mousedown", startDrawing);
-      canvas.addEventListener("mousemove", drawCircle);
+      canvas.addEventListener("mousemove", draw);
       canvas.addEventListener("mouseup", stopDrawing);
-      canvas.addEventListener("mouseleave", stopDrawing);
+
+      canvas.addEventListener("touchstart", startDrawing);
+      canvas.addEventListener("touchmove", draw);
+      canvas.addEventListener("touchend", stopDrawing);
 
       // Start drawing
       function startDrawing(e) {
+        e.preventDefault();
         isDrawing = true;
         inkTrail = [];
-        center = getMouseCoordinates(e);
+        center = getCoordinates(e);
       }
 
-      // Draw circle while moving
-      function drawCircle(e) {
+      // Draw while moving
+      function draw(e) {
+        e.preventDefault();
         if (!isDrawing) return;
-        const currentCoords = getMouseCoordinates(e);
+        const currentCoords = getCoordinates(e);
         inkTrail.push(currentCoords);
         clearCanvas();
         drawInkTrail();
       }
 
       // Stop drawing and calculate score
-      function stopDrawing() {
-        if (!isDrawing) return;
+      function stopDrawing(e) {
+        e.preventDefault();
         isDrawing = false;
         calculateCircle();
         clearCanvas();
@@ -59,13 +64,22 @@
         displayScore(score);
       }
 
-      // Get mouse coordinates relative to the canvas
-      function getMouseCoordinates(e) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        };
+      // Get coordinates based on mouse or touch input
+      function getCoordinates(e) {
+        let x, y;
+        if (e.touches) {
+          // Touch input
+          const touch = e.touches[0];
+          const rect = canvas.getBoundingClientRect();
+          x = touch.clientX - rect.left;
+          y = touch.clientY - rect.top;
+        } else {
+          // Mouse input
+          const rect = canvas.getBoundingClientRect();
+          x = e.clientX - rect.left;
+          y = e.clientY - rect.top;
+        }
+        return { x, y };
       }
 
       // Clear the canvas
