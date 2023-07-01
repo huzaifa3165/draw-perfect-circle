@@ -25,7 +25,7 @@
       let center = { x: 0, y: 0 };
       let radius = 0;
 
-      // Event listeners for mouse and touch events
+      // Event listeners for mouse, touch, and swipe events
       canvas.addEventListener("mousedown", startDrawing);
       canvas.addEventListener("mousemove", draw);
       canvas.addEventListener("mouseup", stopDrawing);
@@ -33,6 +33,7 @@
       canvas.addEventListener("touchstart", startDrawing);
       canvas.addEventListener("touchmove", draw);
       canvas.addEventListener("touchend", stopDrawing);
+      canvas.addEventListener("touchleave", stopDrawing);
 
       // Start drawing
       function startDrawing(e) {
