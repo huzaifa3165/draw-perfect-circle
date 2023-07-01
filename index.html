@@ -3,15 +3,50 @@
   <head>
     <title>Circle Drawing Game</title>
     <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-top: 0;
+      }
+
+      #canvas-container {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        margin: 20px auto;
+      }
+
       #canvas {
-        border: 1px solid black;
+        border: 1px solid #ccc;
         cursor: crosshair;
+        background-color: #fff;
+      }
+
+      #score-container {
+        text-align: center;
+        font-size: 18px;
+        color: #666;
+        margin-bottom: 20px;
       }
     </style>
   </head>
   <body>
     <h1>Circle Drawing Game</h1>
-    <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="canvas-container">
+      <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
     <div id="score-container"></div>
 
     <script>
@@ -29,11 +64,12 @@
       canvas.addEventListener("mousedown", startDrawing);
       canvas.addEventListener("mousemove", draw);
       canvas.addEventListener("mouseup", stopDrawing);
+      canvas.addEventListener("mouseleave", stopDrawing);
 
       canvas.addEventListener("touchstart", startDrawing);
       canvas.addEventListener("touchmove", draw);
       canvas.addEventListener("touchend", stopDrawing);
-      canvas.addEventListener("touchleave", stopDrawing);
+      canvas.addEventListener("touchcancel", stopDrawing);
 
       // Start drawing
       function startDrawing(e) {
@@ -51,11 +87,14 @@
         inkTrail.push(currentCoords);
         clearCanvas();
         drawInkTrail();
+        if (!isInsideCanvas(currentCoords)) {
+          stopDrawing();
+        }
       }
 
       // Stop drawing and calculate score
-      function stopDrawing(e) {
-        e.preventDefault();
+      function stopDrawing() {
+        if (!isDrawing) return;
         isDrawing = false;
         calculateCircle();
         clearCanvas();
@@ -81,6 +120,16 @@
           y = e.clientY - rect.top;
         }
         return { x, y };
+      }
+
+      // Check if the coordinates are inside the canvas
+      function isInsideCanvas(coords) {
+        return (
+          coords.x >= 0 &&
+          coords.x <= canvas.width &&
+          coords.y >= 0 &&
+          coords.y <= canvas.height
+        );
       }
 
       // Clear the canvas
