@@ -269,7 +269,7 @@
           0,
           targetScore - (deviation / maxDeviation) * targetScore
         );
-        return Math.round(score);
+        return Math.round(score*100)/100;
       }
 
       // Find the closest point on the ink trail to the given coordinates
