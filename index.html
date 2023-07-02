@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Circle Drawing Game for Austin Brown</title>
+    <!-- centering and beautifying the start game button -->
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -26,6 +27,10 @@
         width: 500px;
         height: 500px;
         margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
       }
 
       #canvas {
@@ -40,25 +45,45 @@
         color: #666;
         margin-bottom: 20px;
       }
+
+      #start-button {
+        /* giving brown color to the background of button */
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: #8b4513;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
     <h1>Circle Drawing Game for Austin Brown by Huzaifa</h1>
     <div id="canvas-container">
-      <canvas id="canvas" width="500" height="500"></canvas>
+      <button id="start-button">Start Game</button>
+      <canvas id="canvas" class="hidden" width="500" height="500"></canvas>
     </div>
     <div id="score-container"></div>
-
     <script>
       // Get the canvas element and context
       const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
+
+      // Get the button element
+      const startButton = document.getElementById("start-button");
 
       // Initialize variables
       let isDrawing = false;
       let inkTrail = [];
       let center = { x: 0, y: 0 };
       let radius = 0;
+
+      // Add a variable to store the interval ID for vibration
+      let vibrationInterval;
 
       // Event listeners for mouse, touch, and swipe events
       canvas.addEventListener("mousedown", startDrawing);
@@ -71,12 +96,26 @@
       canvas.addEventListener("touchend", stopDrawing);
       canvas.addEventListener("touchcancel", stopDrawing);
 
+      // Event listener for the start button
+
+      startButton.addEventListener("click", startGame);
+
+      // Start the game
+      function startGame() {
+        // Hide the start button
+        startButton.classList.add("hidden");
+        // Show the canvas
+        canvas.classList.remove("hidden");
+      }
+
       // Start drawing
       function startDrawing(e) {
         e.preventDefault();
         isDrawing = true;
         inkTrail = [];
         center = getCoordinates(e);
+        // Start device vibration
+        startVibration();
       }
 
       // Draw while moving
@@ -102,6 +141,28 @@
         drawPerfectCircle();
         const score = calculateScore();
         displayScore(score);
+        // Stop device vibration
+        stopVibration();
+      }
+
+      // Start device vibration
+      function startVibration() {
+        // Check if the vibration API is supported
+        if ("vibrate" in navigator) {
+          // Vibrate for 100ms every 100ms
+          vibrationInterval = setInterval(() => {
+            navigator.vibrate(100);
+          }, 100);
+        }
+      }
+
+      // Stop device vibration
+      function stopVibration() {
+        // Check if the vibration API is supported and there is an ongoing vibration
+        if ("vibrate" in navigator && vibrationInterval) {
+          clearInterval(vibrationInterval);
+          navigator.vibrate(0);
+        }
       }
 
       // Get coordinates based on mouse or touch input
