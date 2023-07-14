@@ -59,6 +59,10 @@
       .hidden {
         display: none;
       }
+      #image {
+        height: 100px;
+        width: 100px;
+      }
     </style>
   </head>
   <body>
@@ -68,6 +72,7 @@
       <canvas id="canvas" class="hidden" width="500" height="500"></canvas>
     </div>
     <div id="score-container"></div>
+    <!-- <img id="image" src="" /> -->
     <script>
       // Get the canvas element and context
       const canvas = document.getElementById("canvas");
@@ -115,7 +120,6 @@
         inkTrail = [];
         center = getCoordinates(e);
         // Start device vibration
-        startVibration();
       }
 
       // Draw while moving
@@ -125,7 +129,9 @@
         const currentCoords = getCoordinates(e);
         inkTrail.push(currentCoords);
         clearCanvas();
+        startVibration();
         drawInkTrail();
+
         if (!isInsideCanvas(currentCoords)) {
           stopDrawing();
         }
@@ -138,19 +144,27 @@
         calculateCircle();
         clearCanvas();
         drawInkTrail();
+        // displayImage();
         drawPerfectCircle();
         const score = calculateScore();
         displayScore(score);
         // Stop device vibration
         stopVibration();
       }
+      // Display the image
+
+      // function displayImage() {
+      //   const image = document.getElementById("image");
+      //   const pngDataURL = canvas.toDataURL("");
+      //   image.src = pngDataURL;
+      // }
 
       // Start device vibration
       function startVibration() {
         // Check if the vibration API is supported
         if ("vibrate" in navigator) {
           // Vibrate for 100ms every 100ms
-          vibrationInterval = setInterval(() => {
+          vibrationInterval = setTimeout(() => {
             navigator.vibrate(100);
           }, 100);
         }
@@ -160,7 +174,7 @@
       function stopVibration() {
         // Check if the vibration API is supported and there is an ongoing vibration
         if ("vibrate" in navigator && vibrationInterval) {
-          clearInterval(vibrationInterval);
+          clearTimeout(vibrationInterval);
           navigator.vibrate(0);
         }
       }
@@ -200,8 +214,8 @@
 
       // Draw the ink trail
       function drawInkTrail() {
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 3;
         ctx.beginPath();
 
         for (let i = 0; i < inkTrail.length; i++) {
@@ -218,8 +232,8 @@
 
       // Draw a perfect circle
       function drawPerfectCircle() {
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#CDCDCD";
+        ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
         ctx.stroke();
@@ -254,7 +268,7 @@
         }
 
         const averageDeviation = totalDeviation / numPoints;
-        const scalingFactor = 2; // Adjust this value to fine-tune the score range
+        const scalingFactor = 3.8; // Adjust this value to fine-tune the score range
         return averageDeviation * scalingFactor;
       }
 
@@ -269,7 +283,7 @@
           0,
           targetScore - (deviation / maxDeviation) * targetScore
         );
-        return Math.round(score*100)/100;
+        return Math.round(score * 100) / 100;
       }
 
       // Find the closest point on the ink trail to the given coordinates
